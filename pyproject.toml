@@ -1,0 +1,22 @@
+[project]
+name = "arm-project"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "LuckyDuckyGG",email = "rominikhom@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "selene (==2.0.0rc9)",
+    "requests (>=2.32.4,<3.0.0)",
+    "pytest (>=8.4.1,<9.0.0)",
+    "allure-pytest (>=2.15.0,<3.0.0)",
+    "dotenv (>=0.9.9,<0.10.0)",
+    "faker (>=37.5.3,<38.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
