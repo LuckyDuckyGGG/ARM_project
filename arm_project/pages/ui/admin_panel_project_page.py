@@ -108,7 +108,7 @@ class AdminPanelProjectPage:
         self.browser.all(".ant-table-row").element_by(
             have.text(f"{value}")
         ).element('[alt="Edit"]').click()
-        self.browser.element('//div[@data-testid="Text" and text()="Завершить"]').click()
+
 
     @allure.step("Подтверждаем завершение проекта")
     def fill_complete_project_password(self, value):
