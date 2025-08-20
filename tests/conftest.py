@@ -117,4 +117,4 @@ def authorization_api(request, setup_browser):
     browser.execute_script(f'localStorage.setItem("token", "{token}")')
     browser.driver.refresh()
 
-    return token
+    return {"token": token, "role": role}
