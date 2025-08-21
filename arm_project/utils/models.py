@@ -16,3 +16,11 @@ class ProjectData:
     office: str
     postal_code: str
     responsible_email: Optional[str] = None
+
+@dataclass
+class User:
+    last_name: str
+    middle_name: str
+    name: str
+    password: str
+    phoneNumber: str
