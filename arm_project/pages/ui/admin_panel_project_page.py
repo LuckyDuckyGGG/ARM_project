@@ -108,6 +108,7 @@ class AdminPanelProjectPage:
         self.browser.all(".ant-table-row").element_by(
             have.text(f"{value}")
         ).element('[alt="Edit"]').click()
+        self.browser.element('//*[text()="Завершить"]').click()
 
 
     @allure.step("Подтверждаем завершение проекта")
