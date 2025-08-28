@@ -4,6 +4,7 @@ import os
 import allure
 import pytest
 import requests
+import config
 
 from selene import browser
 from selenium import webdriver
@@ -30,10 +31,51 @@ def pytest_addoption(parser):
         action='store_true',
         help='Run tests locally instead of Selenoid'
     )
+    parser.addoption(
+        "--context",
+        default="bstack",
+        help="Specify the test context"
+    )
+
 
 @pytest.fixture(scope='session', autouse=True)
 def load_env():
     load_dotenv()
+
+
+def pytest_configure(config):
+    context = config.getoption("--context")
+    env_file_path = f".env.{context}"
+
+    if os.path.exists(env_file_path):
+        load_dotenv(dotenv_path=env_file_path)
+    else:
+        print(f"Warning: Configuration file '{env_file_path}' not found.")
+
+
+@pytest.fixture
+def context(request):
+    return request.config.getoption("--context")
+
+
+@pytest.fixture(scope='function')
+def mobile_management(context):
+    options = config.driver_options(context=context)
+
+    browser.config.driver = webdriver.Remote(options.get_capability('remote_url'), options=options)
+    browser.config.timeout = 10.0
+
+    yield
+
+    attach.add_screenshot(browser)
+    attach.add_xml(browser)
+    if context == 'bstack':
+        session_id = browser.driver.session_id
+        attach.add_video_bstack(session_id)
+
+
+    browser.driver.quit()
+    browser.config.driver = None
 
 
 @pytest.fixture(scope='function')

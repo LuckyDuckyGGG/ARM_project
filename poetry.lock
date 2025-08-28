@@ -33,6 +33,22 @@ attrs = ">=16.0.0"
 pluggy = ">=0.4.0"
 
 [[package]]
+name = "appium-python-client"
+version = "5.2.2"
+description = "Python client for Appium"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "appium_python_client-5.2.2-py3-none-any.whl", hash = "sha256:ae52bb4fb27f6678c3f7b93e46a99bcf297c73daff803ebd4ccec53122269884"},
+    {file = "appium_python_client-5.2.2.tar.gz", hash = "sha256:d3a61b675561c79b4d9ceb9fc0ad8b652c2ea87afdc5fa57cfb5a172816a4b83"},
+]
+
+[package.dependencies]
+selenium = ">=4.26,<5.0"
+typing-extensions = ">=4.13,<5.0"
+
+[[package]]
 name = "attrs"
 version = "25.3.0"
 description = "Classes Without Boilerplate"
@@ -866,4 +882,4 @@ h11 = ">=0.9.0,<1"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "bbcee64d0874d606caee0bde85599f7467385efe0668690bfbf38d78c747f8aa"
+content-hash = "44fad1f85816264a9e1b158a47b8c94ae7404489056db7d3975ad0b70737b3b0"
