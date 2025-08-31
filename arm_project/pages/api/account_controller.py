@@ -14,9 +14,20 @@ class Authorization:
             "password": password
         }
 
+        with allure.step(f"Авторизация пользователя {login}"):
+            safe_payload = payload.copy()
+            safe_payload["password"] = "***REDACTED***"
+            allure.attach(json.dumps(safe_payload, indent=2, ensure_ascii=False),
+                          name="Payload",
+                          attachment_type=allure.attachment_type.JSON)
+
         response = requests.post(base_url + "/account/login", json=payload)
 
         token = response.json()["token"]
+        with allure.step("Получен токен авторизации"):
+            allure.attach("Token: ***REDACTED***", name="Токен", attachment_type=allure.attachment_type.TEXT)
+
+
         return token, response
 
     @allure.step("Проверяем статус код ответа авторизации")

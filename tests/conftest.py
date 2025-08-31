@@ -247,6 +247,9 @@ def authorization_api_ui(request, setup_browser):
     }
 
     email, password = credentials[role]
+    with allure.step(f"Авторизация пользователя с ролью {role}"):
+        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
+        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
 
@@ -255,6 +258,7 @@ def authorization_api_ui(request, setup_browser):
     browser.driver.refresh()
 
     return {"token": token, "role": role}
+
 
 @pytest.fixture
 @allure.step("Авторизуемся через API для API тестов")
@@ -271,6 +275,10 @@ def authorization_api(request):
     }
 
     email, password = credentials[role]
+    with allure.step(f"Авторизация пользователя с ролью {role}"):
+
+        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
+        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
 
@@ -290,6 +298,11 @@ def authorization_api(request):
 def admin_authorization():
     email = os.getenv("EMAIL_ADMIN")
     password = os.getenv("PASSWORD_ADMIN")
+
+
+    with allure.step("Авторизация администратора"):
+        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
+        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
 
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
