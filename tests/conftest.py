@@ -22,23 +22,6 @@ from arm_project.utils.factories import ProjectFactory
 
 DEFAULT_BROWSER_VERSION = "128.0"
 
-_original_log = logging.Logger._log
-
-
-def _safe_log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1):
-    if isinstance(msg, str):
-        password = os.getenv("PASSWORD_ADMIN")
-        if password:
-            msg = msg.replace(password, "***REDACTED***")
-
-        # Маскируем токены и другие чувствительные данные
-        msg = re.sub(r'(password|token)[=:]\s*[^\s,]+', r'\1=***REDACTED***', msg, flags=re.IGNORECASE)
-        msg = re.sub(r'("password":\s*)"[^"]+"', r'\1"***REDACTED***"', msg, flags=re.IGNORECASE)
-
-    return _original_log(self, level, msg, args, exc_info, extra, stack_info, stacklevel)
-
-logging.Logger._log = _safe_log
-
 def pytest_addoption(parser):
     parser.addoption(
         '--browser_version',
