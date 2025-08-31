@@ -5,6 +5,7 @@ import allure
 import pytest
 import requests
 import config
+import re
 
 from selene import browser
 from selenium import webdriver
@@ -120,29 +121,83 @@ def setup_browser(request):
     browser.quit()
 
 
+def sanitize_data(data):
+    sensitive_keys = ['password', 'token', 'auth', 'authorization',
+                      'access_token', 'refresh_token', 'secret',
+                      'api_key', 'key', 'credentials', 'login']
+
+    if isinstance(data, dict):
+        sanitized = {}
+        for key, value in data.items():
+            if any(sensitive in key.lower() for sensitive in sensitive_keys):
+                sanitized[key] = '***REDACTED***'
+            elif isinstance(value, (dict, list)):
+                sanitized[key] = sanitize_data(value)
+            else:
+                sanitized[key] = value
+        return sanitized
+
+    elif isinstance(data, list):
+        return [sanitize_data(item) for item in data]
+
+    return data
+
+
+def sanitize_headers(headers):
+    sensitive_headers = ['authorization', 'token', 'auth', 'cookie', 'set-cookie']
+    sanitized = {}
+
+    for key, value in headers.items():
+        if any(sensitive in key.lower() for sensitive in sensitive_headers):
+            sanitized[key] = '***REDACTED***'
+        else:
+            sanitized[key] = value
+
+    return sanitized
+
+
 @pytest.fixture
 def api_logger():
     original_request = requests.Session.request
 
     def logged_request(self, method, url, **kwargs):
+
         logging.info(f"🚀 API Request: {method.upper()} {url}")
+
+
+        headers = kwargs.get('headers', {})
+        sanitized_headers = sanitize_headers(headers)
+        if sanitized_headers:
+            logging.info(f"📋 Request Headers: {sanitized_headers}")
+
+
         if kwargs.get('json'):
-            pretty_json = json.dumps(kwargs['json'], indent=2, ensure_ascii=False)
+            sanitized_json = sanitize_data(kwargs['json'])
+            pretty_json = json.dumps(sanitized_json, indent=2, ensure_ascii=False)
             logging.info(f"📦 Request Body:\n{pretty_json}")
 
         response = original_request(self, method, url, **kwargs)
 
+
         logging.info(f"✅ API Response: {response.status_code} {response.url}")
         logging.info(f"⏱️  Response time: {response.elapsed.total_seconds() * 1000:.2f}ms")
 
+
+        response_headers = dict(response.headers)
+        sanitized_response_headers = sanitize_headers(response_headers)
+        logging.info(f"📋 Response Headers: {sanitized_response_headers}")
+
         try:
             response_data = response.json()
-            pretty_response = json.dumps(response_data, indent=2, ensure_ascii=False)
+            sanitized_response = sanitize_data(response_data)
+            pretty_response = json.dumps(sanitized_response, indent=2, ensure_ascii=False)
             logging.info(f"📦 Response Body:\n{pretty_response}")
         except:
             response_text = response.text
-            logging.info(f"📄 Response Text: {response_text[:200]}")
+            response_text = re.sub(r'(?i)(token|auth|password)[=:]\s*[\w\-\.]+', r'\1=***REDACTED***', response_text)
+            logging.info(f"📄 Response Text: {response_text[:500]}")
 
+        # Для Allure также используем очищенные данные
         allure_attach(f"API: {method.upper()} {url}", name="API Request", attachment_type=AttachmentType.TEXT)
         allure_attach(f"Status: {response.status_code}", name="API Response", attachment_type=AttachmentType.TEXT)
 
