@@ -215,81 +215,81 @@ def api_logger():
 
 
 @pytest.fixture
-@allure.step("Авторизуемся перед тестом")
 def authorization_ui(setup_browser, request):
-    role = request.param
-    password = os.getenv("PASSWORD_ADMIN")
-    credentials = {
-        "admin": (os.getenv("EMAIL_ADMIN"), password),
-        "expert": (os.getenv("EMAIL_EXPERT"), password),
-        "master": (os.getenv("EMAIL_MASTER"), password),
-        "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
-        "observer": (os.getenv("EMAIL_OBSERVER"), password),
-        "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
-    }
+    with allure.step("Авторизуемся перед тестом"):
+        role = request.param
+        password = os.getenv("PASSWORD_ADMIN")
+        credentials = {
+            "admin": (os.getenv("EMAIL_ADMIN"), password),
+            "expert": (os.getenv("EMAIL_EXPERT"), password),
+            "master": (os.getenv("EMAIL_MASTER"), password),
+            "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
+            "observer": (os.getenv("EMAIL_OBSERVER"), password),
+            "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
+        }
 
-    email, password = credentials[role]
-    authorization_page = AuthorizationPage(browser)
+        email, password = credentials[role]
+        authorization_page = AuthorizationPage(browser)
 
-    authorization_page.open_authorization_form(os.getenv("BASE_URL_UI"))
-    authorization_page.fill_login(email)
-    authorization_page.fill_password(password)
-    authorization_page.accept_user_agreement()
-    authorization_page.submit_authorization()
+        authorization_page.open_authorization_form(os.getenv("BASE_URL_UI"))
+        authorization_page.fill_login(email)
+        authorization_page.fill_password(password)
+        authorization_page.accept_user_agreement()
+        authorization_page.submit_authorization()
 
 
 @pytest.fixture
-@allure.step("Авторизуемся через API перед тестом")
 def authorization_api_ui(request, setup_browser, base_url_api):
-    role = request.param
-    password = os.getenv("PASSWORD_ADMIN")
-    credentials = {
-        "admin": (os.getenv("EMAIL_ADMIN"), password),
-        "expert": (os.getenv("EMAIL_EXPERT"), password),
-        "master": (os.getenv("EMAIL_MASTER"), password),
-        "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
-        "observer": (os.getenv("EMAIL_OBSERVER"), password),
-        "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
-    }
+    with allure.step("Авторизуемся через API перед тестом"):
+        role = request.param
+        password = os.getenv("PASSWORD_ADMIN")
+        credentials = {
+            "admin": (os.getenv("EMAIL_ADMIN"), password),
+            "expert": (os.getenv("EMAIL_EXPERT"), password),
+            "master": (os.getenv("EMAIL_MASTER"), password),
+            "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
+            "observer": (os.getenv("EMAIL_OBSERVER"), password),
+            "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
+        }
 
-    email, password = credentials[role]
-    auth = Authorization()
-    token, response = auth.authorization(base_url_api, email, password)
+        email, password = credentials[role]
+        auth = Authorization()
+        token, response = auth.authorization(base_url_api, email, password)
 
-    browser.open(os.getenv("BASE_URL_UI"))
-    browser.execute_script(f'localStorage.setItem("token", "{token}")')
-    browser.driver.refresh()
+        browser.open(os.getenv("BASE_URL_UI"))
+        browser.execute_script(f'localStorage.setItem("token", "{token}")')
+        browser.driver.refresh()
 
-    return {"token": token, "role": role}
+        return {"token": token, "role": role}
 
 @pytest.fixture
-@allure.step("Авторизуемся через API для API тестов")
 def authorization_api(request, base_url_api):
-    role = request.param
-    password = os.getenv("PASSWORD_ADMIN")
-    credentials = {
-        "admin": (os.getenv("EMAIL_ADMIN"), password),
-        "expert": (os.getenv("EMAIL_EXPERT"), password),
-        "master": (os.getenv("EMAIL_MASTER"), password),
-        "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
-        "observer": (os.getenv("EMAIL_OBSERVER"), password),
-        "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
-    }
+    with allure.step("Авторизуемся через API для API тестов"):
+        role = request.param
+        password = os.getenv("PASSWORD_ADMIN")
+        credentials = {
+            "admin": (os.getenv("EMAIL_ADMIN"), password),
+            "expert": (os.getenv("EMAIL_EXPERT"), password),
+            "master": (os.getenv("EMAIL_MASTER"), password),
+            "subcontractor": (os.getenv("EMAIL_SUBCONTRACTOR"), password),
+            "observer": (os.getenv("EMAIL_OBSERVER"), password),
+            "supervisor": (os.getenv("EMAIL_SUPERVISOR"), password)
+        }
 
-    email, password = credentials[role]
-    auth = Authorization()
-    token, response = auth.authorization(base_url_api, email, password)
+        email, password = credentials[role]
+        auth = Authorization()
+        token, response = auth.authorization(base_url_api, email, password)
 
-    response_data = response.json()
-    account_id = response_data["data"]["id"]
+        response_data = response.json()
+        account_id = response_data["data"]["id"]
 
-    return {
-        "response": response,
-        "token": token,
-        "account_id": account_id,
-        "role": role,
-        "email": email
-    }
+        return {
+            "response": response,
+            "token": token,
+            "account_id": account_id,
+            "role": role,
+            "email": email
+        }
 
 
 @pytest.fixture
