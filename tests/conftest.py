@@ -318,3 +318,9 @@ def create_project_with_required_fields(admin_authorization):
     )
 
     return response.json()
+
+def pytest_allure_attach_parametrize(params):
+    return {}
+
+def pytest_allure_modify_params(params):
+    return []
