@@ -203,7 +203,6 @@ def api_logger():
             response_text = re.sub(r'(?i)(token|auth|password)[=:]\s*[\w\-\.]+', r'\1=***REDACTED***', response_text)
             logging.info(f"📄 Response Text: {response_text[:500]}")
 
-        # Для Allure также используем очищенные данные
         allure_attach(f"API: {method.upper()} {url}", name="API Request", attachment_type=AttachmentType.TEXT)
         allure_attach(f"Status: {response.status_code}", name="API Response", attachment_type=AttachmentType.TEXT)
 
