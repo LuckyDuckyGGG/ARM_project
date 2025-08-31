@@ -10,8 +10,6 @@ from tests.conftest import base_url_api
 
 load_dotenv()
 
-url = base_url_api()
-
 @allure.parent_suite('API')
 @allure.suite('Контроллер project')
 @allure.sub_suite('Контроллер project')
@@ -26,11 +24,11 @@ class TestProjectController:
     @allure.tag('API', 'Project')
     @allure.label('owner', 'rominikhom')
     @pytest.mark.parametrize("authorization_api", ["admin"], indirect=True)
-    def test_delete_project(self, api_logger, authorization_api, create_project_with_required_fields):
+    def test_delete_project(self, api_logger, authorization_api, create_project_with_required_fields, base_url_api):
         delete_project = CreateProject()
         token = authorization_api["token"]
         project_id = create_project_with_required_fields
 
 
-        response = delete_project.delete_project(url=url, token=token, project_id=project_id)
+        response = delete_project.delete_project(url=base_url_api, token=token, project_id=project_id)
         delete_project.delete_project_status_code_200(response)

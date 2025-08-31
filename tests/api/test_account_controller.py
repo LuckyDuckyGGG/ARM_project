@@ -12,8 +12,6 @@ from tests.conftest import base_url_api
 
 load_dotenv()
 
-url = base_url_api()
-
 @allure.parent_suite('API')
 @allure.suite('Контроллер account')
 @allure.sub_suite('Контроллер account')
@@ -43,14 +41,14 @@ class TestAccountController:
     @allure.label('owner', 'rominikhom')
     @pytest.mark.parametrize("authorization_api", ["admin", "expert", "master", "subcontractor", "observer", "supervisor"],
                              indirect=True)
-    def test_get_account_info(self, api_logger, authorization_api):
+    def test_get_account_info(self, api_logger, authorization_api, base_url_api):
         info = AccountInfo()
 
         token = authorization_api["token"]
         account_id = authorization_api["account_id"]
 
         response = info.get_account_info(
-            base_url=url,
+            base_url=base_url_api,
             account_id=account_id,
             token=token
         )
@@ -63,20 +61,20 @@ class TestAccountController:
     @allure.tag('API', 'Account')
     @allure.label('owner', 'rominikhom')
     @pytest.mark.parametrize("authorization_api", ["admin", "expert"], indirect=True)
-    def test_edit_user_name(self, api_logger, authorization_api):
+    def test_edit_user_name(self, api_logger, authorization_api, base_url_api):
         edit_name = AccountEdit()
         user = UserFactory().create_user()
 
         auth = Authorization()
         observer_email = os.getenv("EMAIL_OBSERVER")
         password = os.getenv("PASSWORD_ADMIN")
-        observer_token, observer_response = auth.authorization(url, observer_email, password)
+        observer_token, observer_response = auth.authorization(base_url_api, observer_email, password)
         observer_data = observer_response.json()
         observer_id = observer_data["data"]["id"]
 
         token = authorization_api["token"]
         response = edit_name.put_account_edit_name(
-            base_url=url,
+            base_url=base_url_api,
             token=token,
             value=user.name,
             account_id=observer_id
@@ -88,7 +86,7 @@ class TestAccountController:
 
         with step("Возвращаем предыдущее имя пользователя"):
             edit_name.put_account_edit_name(
-                base_url=url,
+                base_url=base_url_api,
                 token=token,
                 value="Наблюдатель",
                 account_id=observer_id
