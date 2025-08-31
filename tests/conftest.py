@@ -6,7 +6,6 @@ import pytest
 import requests
 import config
 import re
-import _pytest.logging
 
 from selene import browser
 from selenium import webdriver
@@ -22,33 +21,23 @@ from arm_project.utils import attach
 from arm_project.utils.factories import ProjectFactory
 
 DEFAULT_BROWSER_VERSION = "128.0"
+
 _original_log = logging.Logger._log
 
 
 def _safe_log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1):
-
     if isinstance(msg, str):
-        msg = msg.replace(os.getenv("PASSWORD_ADMIN", ""), "***REDACTED***")
-        msg = re.sub(r'(password|token)[=:]\s*[^\s]+', r'\1=***REDACTED***', msg, flags=re.IGNORECASE)
-        msg = re.sub(r'("password":\s*)"[^"]+"', r'\1"***REDACTED***"', msg, flags=re.IGNORECASE)
+        password = os.getenv("PASSWORD_ADMIN")
+        if password:
+            msg = msg.replace(password, "***REDACTED***")
 
+        # Маскируем токены и другие чувствительные данные
+        msg = re.sub(r'(password|token)[=:]\s*[^\s,]+', r'\1=***REDACTED***', msg, flags=re.IGNORECASE)
+        msg = re.sub(r'("password":\s*)"[^"]+"', r'\1"***REDACTED***"', msg, flags=re.IGNORECASE)
 
     return _original_log(self, level, msg, args, exc_info, extra, stack_info, stacklevel)
 
-
 logging.Logger._log = _safe_log
-_original_pytest_logstart = _pytest.logging.pytest_runtest_logstart
-
-
-def pytest_runtest_logstart(nodeid, location):
-    pass
-
-
-_original_pytest_logfinish = _pytest.logging.pytest_runtest_logfinish
-
-
-def pytest_runtest_logfinish(nodeid, location):
-    pass
 
 def pytest_addoption(parser):
     parser.addoption(
