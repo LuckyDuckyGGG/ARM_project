@@ -4,7 +4,6 @@ import os
 import allure
 import pytest
 import requests
-import uuid
 import config
 
 from selene import browser
@@ -19,7 +18,6 @@ from arm_project.pages.ui.authorization_page import AuthorizationPage
 from arm_project.pages.api.account_controller import Authorization
 from arm_project.utils import attach
 from arm_project.utils.factories import ProjectFactory
-
 
 DEFAULT_BROWSER_VERSION = "128.0"
 
@@ -88,12 +86,8 @@ def setup_browser(request):
     options = Options()
 
     if is_local:
-        user_data_dir = f"/tmp/chrome_{uuid.uuid4().hex}"
-        options.add_argument(f"--user-data-dir={user_data_dir}")
-        options.add_argument("--profile-directory=Default")
         driver = webdriver.Chrome(options=options)
     else:
-        options.add_argument("--profile-directory=Default")
         selenoid_capabilities = {
             "browserName": "chrome",
             "browserVersion": browser_version,
