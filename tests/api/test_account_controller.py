@@ -12,7 +12,7 @@ from tests.conftest import base_url_api
 
 load_dotenv()
 
-url = base_url_api
+url = base_url_api()
 
 @allure.parent_suite('API')
 @allure.suite('Контроллер account')
