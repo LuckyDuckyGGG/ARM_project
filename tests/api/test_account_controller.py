@@ -8,11 +8,11 @@ from arm_project.pages.api.account_controller import *
 from arm_project.utils.factories import UserFactory
 from allure_commons.types import Severity
 
-from tests.conftest import safe_parametrize
+from tests.conftest import base_url_api
 
 load_dotenv()
 
-url = os.getenv("BASE_URL_API")
+url = base_url_api
 
 @allure.parent_suite('API')
 @allure.suite('Контроллер account')
@@ -27,7 +27,7 @@ class TestAccountController:
     @allure.severity(Severity.CRITICAL)
     @allure.tag('API', 'Account')
     @allure.label('owner', 'rominikhom')
-    @safe_parametrize("authorization_api", ["admin", "expert", "master", "subcontractor", "observer", "supervisor"],
+    @pytest.mark.parametrize("authorization_api", ["admin", "expert", "master", "subcontractor", "observer", "supervisor"],
                              indirect=True)
     def test_post_account_login(self, api_logger, authorization_api):
         authorization = Authorization()
@@ -41,7 +41,7 @@ class TestAccountController:
     @allure.severity(Severity.CRITICAL)
     @allure.tag('API', 'Account')
     @allure.label('owner', 'rominikhom')
-    @safe_parametrize("authorization_api", ["admin", "expert", "master", "subcontractor", "observer", "supervisor"],
+    @pytest.mark.parametrize("authorization_api", ["admin", "expert", "master", "subcontractor", "observer", "supervisor"],
                              indirect=True)
     def test_get_account_info(self, api_logger, authorization_api):
         info = AccountInfo()
@@ -62,7 +62,7 @@ class TestAccountController:
     @allure.severity(Severity.NORMAL)
     @allure.tag('API', 'Account')
     @allure.label('owner', 'rominikhom')
-    @safe_parametrize("authorization_api", ["admin", "expert"], indirect=True)
+    @pytest.mark.parametrize("authorization_api", ["admin", "expert"], indirect=True)
     def test_edit_user_name(self, api_logger, authorization_api):
         edit_name = AccountEdit()
         user = UserFactory().create_user()

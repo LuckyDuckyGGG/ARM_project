@@ -78,6 +78,12 @@ def mobile_management(context):
     browser.driver.quit()
     browser.config.driver = None
 
+@pytest.fixture(scope='session')
+def base_url_api():
+    base_url = os.getenv("BASE_URL_API")
+    if not base_url:
+        pytest.fail("BASE_URL_API environment variable is not set.")
+    return base_url
 
 @pytest.fixture(scope='function')
 def setup_browser(request):
@@ -119,20 +125,6 @@ def setup_browser(request):
         attach.add_video(browser)
 
     browser.quit()
-
-
-def safe_parametrize(argnames, argvalues, **kwargs):
-    safe_argvalues = []
-    for values in argvalues:
-        safe_values = []
-        for value in values:
-            if any(sensitive in str(value).lower() for sensitive in ['password', 'token', 'secret', 'key']):
-                safe_values.append('***REDACTED***')
-            else:
-                safe_values.append(value)
-        safe_argvalues.append(safe_values)
-
-    return pytest.mark.parametrize(argnames, safe_argvalues, **kwargs)
 
 
 def sanitize_data(data):
@@ -248,7 +240,7 @@ def authorization_ui(setup_browser, request):
 
 @pytest.fixture
 @allure.step("Авторизуемся через API перед тестом")
-def authorization_api_ui(request, setup_browser):
+def authorization_api_ui(request, setup_browser, base_url_api):
     role = request.param
     password = os.getenv("PASSWORD_ADMIN")
     credentials = {
@@ -262,7 +254,7 @@ def authorization_api_ui(request, setup_browser):
 
     email, password = credentials[role]
     auth = Authorization()
-    token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
+    token, response = auth.authorization(base_url_api, email, password)
 
     browser.open(os.getenv("BASE_URL_UI"))
     browser.execute_script(f'localStorage.setItem("token", "{token}")')
@@ -272,7 +264,7 @@ def authorization_api_ui(request, setup_browser):
 
 @pytest.fixture
 @allure.step("Авторизуемся через API для API тестов")
-def authorization_api(request):
+def authorization_api(request, base_url_api):
     role = request.param
     password = os.getenv("PASSWORD_ADMIN")
     credentials = {
@@ -286,7 +278,7 @@ def authorization_api(request):
 
     email, password = credentials[role]
     auth = Authorization()
-    token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
+    token, response = auth.authorization(base_url_api, email, password)
 
     response_data = response.json()
     account_id = response_data["data"]["id"]
@@ -301,12 +293,12 @@ def authorization_api(request):
 
 
 @pytest.fixture
-def admin_authorization():
+def admin_authorization(base_url_api):
     email = os.getenv("EMAIL_ADMIN")
     password = os.getenv("PASSWORD_ADMIN")
 
     auth = Authorization()
-    token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
+    token, response = auth.authorization(base_url_api, email, password)
     response_data = response.json()
 
     return {
@@ -315,12 +307,12 @@ def admin_authorization():
     }
 
 @pytest.fixture()
-def create_project_with_required_fields(admin_authorization):
+def create_project_with_required_fields(admin_authorization, base_url_api):
 
     create_project = CreateProject()
     token = admin_authorization["token"]
     organization_id = admin_authorization["organization_id"]
-    url = os.getenv("BASE_URL_API")
+    url = base_url_api
     project = ProjectFactory().create_project()
 
     response = create_project.create_project_with_required_field(
