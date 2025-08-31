@@ -6,6 +6,7 @@ import pytest
 import requests
 import config
 import re
+import _pytest.logging
 
 from selene import browser
 from selenium import webdriver
@@ -21,6 +22,33 @@ from arm_project.utils import attach
 from arm_project.utils.factories import ProjectFactory
 
 DEFAULT_BROWSER_VERSION = "128.0"
+_original_log = logging.Logger._log
+
+
+def _safe_log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=1):
+
+    if isinstance(msg, str):
+        msg = msg.replace(os.getenv("PASSWORD_ADMIN", ""), "***REDACTED***")
+        msg = re.sub(r'(password|token)[=:]\s*[^\s]+', r'\1=***REDACTED***', msg, flags=re.IGNORECASE)
+        msg = re.sub(r'("password":\s*)"[^"]+"', r'\1"***REDACTED***"', msg, flags=re.IGNORECASE)
+
+
+    return _original_log(self, level, msg, args, exc_info, extra, stack_info, stacklevel)
+
+
+logging.Logger._log = _safe_log
+_original_pytest_logstart = _pytest.logging.pytest_runtest_logstart
+
+
+def pytest_runtest_logstart(nodeid, location):
+    pass
+
+
+_original_pytest_logfinish = _pytest.logging.pytest_runtest_logfinish
+
+
+def pytest_runtest_logfinish(nodeid, location):
+    pass
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -300,30 +328,3 @@ def admin_authorization():
         "organization_id": response_data["data"]["organizationId"]
     }
 
-@pytest.fixture()
-def create_project_with_required_fields(admin_authorization):
-
-    create_project = CreateProject()
-    token = admin_authorization["token"]
-    organization_id = admin_authorization["organization_id"]
-    url = os.getenv("BASE_URL_API")
-    project = ProjectFactory().create_project()
-
-    response = create_project.create_project_with_required_field(
-        url=url,
-        token=token,
-        organization_id=organization_id,
-        project_name=project.name,
-        project_city=project.city
-    )
-
-    return response.json()
-
-def pytest_allure_attach_parametrize(params):
-    safe_params = {}
-    for key, value in params.items():
-        if any(sensitive in key.lower() for sensitive in ['password', 'token', 'secret', 'key', 'auth']):
-            safe_params[key] = '***REDACTED***'
-        else:
-            safe_params[key] = value
-    return safe_params
