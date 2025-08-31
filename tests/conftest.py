@@ -318,3 +318,12 @@ def create_project_with_required_fields(admin_authorization):
     )
 
     return response.json()
+
+def pytest_allure_attach_parametrize(params):
+    safe_params = {}
+    for key, value in params.items():
+        if any(sensitive in key.lower() for sensitive in ['password', 'token', 'secret', 'key', 'auth']):
+            safe_params[key] = '***REDACTED***'
+        else:
+            safe_params[key] = value
+    return safe_params
