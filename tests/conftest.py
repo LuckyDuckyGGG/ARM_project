@@ -121,6 +121,20 @@ def setup_browser(request):
     browser.quit()
 
 
+def safe_parametrize(argnames, argvalues, **kwargs):
+    safe_argvalues = []
+    for values in argvalues:
+        safe_values = []
+        for value in values:
+            if any(sensitive in str(value).lower() for sensitive in ['password', 'token', 'secret', 'key']):
+                safe_values.append('***REDACTED***')
+            else:
+                safe_values.append(value)
+        safe_argvalues.append(safe_values)
+
+    return pytest.mark.parametrize(argnames, safe_argvalues, **kwargs)
+
+
 def sanitize_data(data):
     sensitive_keys = ['password', 'token', 'auth', 'authorization',
                       'access_token', 'refresh_token', 'secret',
@@ -247,9 +261,6 @@ def authorization_api_ui(request, setup_browser):
     }
 
     email, password = credentials[role]
-    with allure.step(f"Авторизация пользователя с ролью {role}"):
-        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
-        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
 
@@ -258,7 +269,6 @@ def authorization_api_ui(request, setup_browser):
     browser.driver.refresh()
 
     return {"token": token, "role": role}
-
 
 @pytest.fixture
 @allure.step("Авторизуемся через API для API тестов")
@@ -275,10 +285,6 @@ def authorization_api(request):
     }
 
     email, password = credentials[role]
-    with allure.step(f"Авторизация пользователя с ролью {role}"):
-
-        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
-        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)
 
@@ -298,11 +304,6 @@ def authorization_api(request):
 def admin_authorization():
     email = os.getenv("EMAIL_ADMIN")
     password = os.getenv("PASSWORD_ADMIN")
-
-
-    with allure.step("Авторизация администратора"):
-        allure.attach(f"Email: {email}", name="Логин", attachment_type=allure.attachment_type.TEXT)
-        allure.attach("Password: ***REDACTED***", name="Пароль", attachment_type=allure.attachment_type.TEXT)
 
     auth = Authorization()
     token, response = auth.authorization(os.getenv("BASE_URL_API"), email, password)

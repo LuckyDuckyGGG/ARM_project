@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from arm_project.pages.api.project_controller import CreateProject
 from allure_commons.types import Severity
 
+from tests.conftest import safe_parametrize
+
 load_dotenv()
 
 url = os.getenv("BASE_URL_API")
@@ -23,7 +25,7 @@ class TestProjectController:
     @allure.severity(Severity.CRITICAL)
     @allure.tag('API', 'Project')
     @allure.label('owner', 'rominikhom')
-    @pytest.mark.parametrize("authorization_api", ["admin"], indirect=True)
+    @safe_parametrize("authorization_api", ["admin"], indirect=True)
     def test_delete_project(api_logger, authorization_api, create_project_with_required_fields):
         delete_project = CreateProject()
         token = authorization_api["token"]
