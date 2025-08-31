@@ -232,45 +232,8 @@ def authorization_ui(setup_browser, request):
     authorization_page.submit_authorization()
 
 
-import re
-from functools import wraps
-
-
-def mask_sensitive_data(func):
-
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        request = args[0] if args else None
-        if request and hasattr(request, 'param'):
-            role = request.param
-            logging.info(f"🛡️  Авторизация для роли: {role} (данные скрыты)")
-        else:
-            logging.info(f"🛡️  Вызов {func.__name__} (данные скрыты)")
-
-        result = func(*args, **kwargs)
-
-        if isinstance(result, dict) and 'token' in result:
-            masked_result = result.copy()
-            if 'token' in masked_result:
-                token = masked_result['token']
-                masked_result['token'] = f"{token[:10]}...{token[-10:]}" if token and len(
-                    token) > 20 else '***REDACTED***'
-            if 'email' in masked_result:
-                email = masked_result['email']
-                if '@' in email:
-                    name, domain = email.split('@', 1)
-                    masked_result['email'] = f"{name[:3]}...@{domain}"
-            logging.info(
-                f"🛡️  Результат авторизации: { {k: '***REDACTED***' if k in ['token', 'password'] else v for k, v in masked_result.items()} }")
-
-        return result
-
-    return wrapper
-
-
 @pytest.fixture
 @allure.step("Авторизуемся через API перед тестом")
-@mask_sensitive_data
 def authorization_api_ui(request, setup_browser):
     role = request.param
     password = os.getenv("PASSWORD_ADMIN")
@@ -293,10 +256,8 @@ def authorization_api_ui(request, setup_browser):
 
     return {"token": token, "role": role}
 
-
 @pytest.fixture
 @allure.step("Авторизуемся через API для API тестов")
-@mask_sensitive_data
 def authorization_api(request):
     role = request.param
     password = os.getenv("PASSWORD_ADMIN")
