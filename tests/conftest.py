@@ -1,13 +1,15 @@
 import json
 import logging
 import os
+import time
+
 import allure
 import pytest
 import requests
 import config
 import re
 
-from selene import browser
+from selene import browser, be
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from dotenv import load_dotenv
@@ -255,8 +257,16 @@ def authorization_api_ui(request, setup_browser, base_url_api):
         auth = Authorization()
         token, response = auth.authorization(base_url_api, email, password)
 
+        assert token and len(token) > 0, "Не удалось получить токен"
+
         browser.open(os.getenv("BASE_URL_UI"))
+        browser.element('[class="Login__form"]').should(be.visible)
         browser.execute_script(f'localStorage.setItem("token", "{token}")')
+        stored_token = browser.execute_script('return localStorage.getItem("token")')
+        if stored_token != token:
+            browser.execute_script(f'localStorage.setItem("token", "{token}")')
+            stored_token = browser.execute_script('return localStorage.getItem("token")')
+            assert stored_token == token, "Токен не записался в localStorage"
         browser.driver.refresh()
 
         return {"token": token, "role": role}
