@@ -28,7 +28,7 @@
 ### <img src="https://jenkins.io/images/logos/jenkins/jenkins.svg" width="20"> **Jenkins Pipeline**
 
 **Ссылка на сборку**:  
-[**AR Mobile UI Job**](https://jenkins.autotests.cloud/job/LuckyDucky_qa_guru_python_20_14_jenkins/)
+[**AR Mobile Job**](https://jenkins.autotests.cloud/job/LuckyDucky_qa_guru_python_armobile/)
 
 **Особенности пайплайна**:
 - Запуск тестов с использованием браузера в Selenoid
@@ -43,7 +43,7 @@
 
 ### <img src="https://avatars.githubusercontent.com/u/5879127?s=200&v=4" width="20"> Allure Report
 **Пример отчёта**:  
-[**AR Mobile UI Report**](https://jenkins.autotests.cloud/job/LuckyDucky_qa_guru_python_20_14_jenkins/1/allure/)
+[**AR Mobile Report**](https://jenkins.autotests.cloud/job/LuckyDucky_qa_guru_python_20_14_jenkins/1/allure/)
 
 ![Report image](https://github.com/LuckyDuckyGGG/homework_qa_guru_20_14/blob/main/files/chrome_2swgE3tEru.png)  
 ![Report image2](https://github.com/LuckyDuckyGGG/homework_qa_guru_20_14/blob/main/files/chrome_eiUxsOyLQM.png)
